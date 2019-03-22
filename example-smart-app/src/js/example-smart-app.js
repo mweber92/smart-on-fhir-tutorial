@@ -1,6 +1,7 @@
 (function(window){
   window.extractData = function() {
     var ret = $.Deferred();
+    console.log("ret:", ret);
 
     function onError() {
       console.log('Loading error', arguments);
@@ -8,6 +9,7 @@
     }
 
     function onReady(smart)  {
+      console.log("smart:", smart);
       if (smart.hasOwnProperty('patient')) {
         var patient = smart.patient;
         var pt = patient.read();
@@ -22,6 +24,7 @@
                     }
                   });
 
+        console.log("pt, obv:", pt, obv);
         $.when(pt, obv).fail(onError);
 
         $.when(pt, obv).done(function(patient, obv) {
@@ -39,6 +42,7 @@
           var height = byCodes('8302-2');
           var systolicbp = getBloodPressureValue(byCodes('55284-4'),'8480-6');
           var diastolicbp = getBloodPressureValue(byCodes('55284-4'),'8462-4');
+          console.log("by codes", byCodes('55284-4'));
           var hdl = byCodes('2085-9');
           var ldl = byCodes('2089-1');
 
@@ -61,6 +65,7 @@
           p.ldl = getQuantityValueAndUnit(ldl[0]);
 
           ret.resolve(p);
+          console.log("ret, p", ret.resolve(p), p);
         });
       } else {
         onError();
@@ -68,6 +73,8 @@
     }
 
     FHIR.oauth2.ready(onReady, onError);
+
+    console.log("ret promise:", ret.promise());
     return ret.promise();
 
   };
@@ -88,6 +95,8 @@
 
   function getBloodPressureValue(BPObservations, typeOfPressure) {
     var formattedBPObservations = [];
+    console.log("BPObservations", BPObservations, typeOfPressure);
+
     BPObservations.forEach(function(observation){
       var BP = observation.component.find(function(component){
         return component.code.coding.find(function(coding) {
@@ -99,7 +108,7 @@
         formattedBPObservations.push(observation);
       }
     });
-
+    console.log("getQuantityValueAndUnit", getQuantityValueAndUnit(formattedBPObservations[0]));
     return getQuantityValueAndUnit(formattedBPObservations[0]);
   }
 
